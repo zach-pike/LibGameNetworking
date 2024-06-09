@@ -1,0 +1,14 @@
+cmake_minimum_required(VERSION 3.22.1)
+project(LibGameNetworking)
+
+set(CMAKE_CXX_STANDARD 20)
+
+file(GLOB_RECURSE LIBFILES src/lib/*.cpp)
+
+add_library(gamenetworking SHARED ${LIBFILES})
+
+add_executable(main src/main.cpp)
+target_link_libraries(main gamenetworking)
+
+add_executable(client src/test/ClientTest.cpp)
+add_executable(server src/test/ServerTest.cpp)
