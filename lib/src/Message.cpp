@@ -4,6 +4,11 @@
 
 Message::Message() {}
 
+Message::Message(std::uint32_t id) {
+    header.id = id;
+    header.size = 0;
+}
+
 Message::Message(std::uint32_t id, std::string str) {
     header.id = id;
     header.size = str.size();

@@ -18,6 +18,7 @@ public:
 
     Message();
 
+    Message(std::uint32_t id);
     Message(std::uint32_t id, std::string str);
     Message(std::uint32_t id, const std::uint8_t* data, std::size_t size);
 };
