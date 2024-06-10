@@ -9,3 +9,11 @@ Message::Message(std::uint32_t id, std::string str) {
     header.size = str.size();
     body.insert(body.end(), str.begin(), str.end());
 }
+
+Message::Message(std::uint32_t id, const std::uint8_t* data, std::size_t size) {
+    header.id = id;
+    header.size = size;
+    body.resize(size);
+
+    memcpy(body.data(), data, size);
+}
