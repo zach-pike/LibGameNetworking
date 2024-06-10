@@ -4,8 +4,6 @@
 #define ASIO_STANDALONE
 #include <asio.hpp>
 
-#include "uuid_v4.h"
-
 #include <thread>
 #include <vector>
 #include <memory>

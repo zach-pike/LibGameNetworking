@@ -1,73 +1,74 @@
-#include "GameServer/GameServer.hpp"
 
 #include <chrono>
 #include <iostream>
 #include <map>
 
+#include "GameServer/GameServer.hpp"
+#include "util/Collatz.hpp"
+
 class MyTestServer : public GameServer {
 private:
-    UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
-    std::map<UUIDv4::UUID, std::shared_ptr<Connection>> uuidToConnection;
-    std::mutex uuidToConnectionLock;
+    std::vector<std::shared_ptr<Connection>> verifiedConnections;
+    std::map<std::shared_ptr<Connection>, std::uint32_t> unverifiedConnections;
 
-    std::map<std::shared_ptr<Connection>, UUIDv4::UUID> waitingToValidate;
-    std::mutex waitingToValidateLock;
 public:
     MyTestServer(std::uint16_t p):
         GameServer(p) {}
 
 protected:
     bool onClientConnect(std::shared_ptr<Connection> client) override {
-        // Generate a uuid
-        UUIDv4::UUID id = uuidGenerator.getUUID();
+        srand(time(nullptr));
 
-        std::string uuidStr;
-        id.bytes(uuidStr);
+        std::uint32_t num = rand() % UINT32_MAX;
+        std::uint32_t collatz = collatzNumber(num);
 
-        // Send it to the client
-        client->sendMessage(Message(UINT32_MAX, uuidStr));
+        client->sendMessage(Message(UINT32_MAX, (std::uint8_t*)&num, 4));
 
-        // Add user to list of people waiting to be validated
-        std::scoped_lock lock(waitingToValidateLock);
-        waitingToValidate.insert({ client, id });
+        unverifiedConnections.insert({ client, collatz });
 
         return true;
     }
 
 	void onClientDisconnect(std::shared_ptr<Connection> client) override {
+        // If a client disconnects, check if they were on the list of validated or waiting to validate
+        auto unverifiedIter = unverifiedConnections.begin();
+        if ((unverifiedIter = unverifiedConnections.find(client)) != unverifiedConnections.end()) {
+            // Erase it
+            unverifiedConnections.erase(unverifiedIter);
+        }
+
+        auto verifiedIter = verifiedConnections.begin();
+        if ((verifiedIter = std::find(verifiedConnections.begin(), verifiedConnections.end(), client)) != verifiedConnections.end()) {
+            // Erase it
+            verifiedConnections.erase(verifiedIter);
+        }
 
     }
 
     void onMessage(std::shared_ptr<Connection> client, Message& msg) override {
         // This means this is a metadata packet
         if (msg.header.id == UINT32_MAX) {
-            std::scoped_lock lock(waitingToValidateLock);
-
             // check if connection is in list
-            auto iter = waitingToValidate.begin();
+            auto iter = unverifiedConnections.begin();
 
-            if ((iter = waitingToValidate.find(client)) != waitingToValidate.end()) {
-                auto uuid = waitingToValidate.at(client);
+            if ((iter = unverifiedConnections.find(client)) != unverifiedConnections.end()) {
+                auto collatzNumber = unverifiedConnections.at(client);
 
-                // It is, check if packet is a valid ack
-                std::string incomingMessageStr((const char*)msg.body.data(), msg.body.size());
+                std::uint32_t valueFromClient = *(std::uint32_t*)msg.body.data();
 
-                // Regenerate the uuid str
-                std::string correctValue;
-                uuid.bytes(correctValue);
-
-                if (incomingMessageStr == correctValue) {
+                if (collatzNumber == valueFromClient) {
                     // User validated!
-                    std::scoped_lock lock2(uuidToConnectionLock);
-                    uuidToConnection.insert({ uuid, client });
 
                     // Remove from unvalidated list
-                    waitingToValidate.erase(iter);
+                    unverifiedConnections.erase(iter);
+
+                    // Add to verified connections
+                    verifiedConnections.push_back(client);
 
                     client->sendMessage(Message(UINT32_MAX, "GAMER"));
                 } else {
                     // Socket disconnect
-                    waitingToValidate.erase(iter);
+                    unverifiedConnections.erase(iter);
                     client->disconnect();
                 }
             }

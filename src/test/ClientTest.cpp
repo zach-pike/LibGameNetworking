@@ -1,6 +1,6 @@
 #include "GameClient/GameClient.hpp"
 
-#include "uuid_v4.h"
+#include "util/Collatz.hpp"
 
 #include <chrono>
 
@@ -18,19 +18,17 @@ int main() {
     // Wait for message
     while (queue.count() == 0) std::this_thread::sleep_for(100ms);
 
-    // Client UUID
-    UUIDv4::UUID uuid;
-
     // Repeat message right back to server
     if (queue.front().message.header.id == UINT32_MAX) {
         // Convert to string then resend
         Message msg = queue.pop_front().message;
 
-        std::string strMsg((const char*)msg.body.data(), msg.body.size());
+        std::uint32_t value = *(std::uint32_t*)msg.body.data();
 
-        uuid = UUIDv4::UUID(strMsg);
+        // Calculate Collatz number
+        std::uint32_t calcValue = collatzNumber(value);
 
-        client.send(Message(UINT32_MAX, strMsg));
+        client.send(Message(UINT32_MAX, (std::uint8_t*)&calcValue, 4));
     } else {
         exit(1);
     }
