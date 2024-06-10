@@ -5,8 +5,8 @@
 #include <asio.hpp>
 #include <asio/ts/buffer.hpp>
 
-#include "../Message/Message.hpp"
-#include "../TSQueue/TSQueue.hpp"
+#include "Message.hpp"
+#include "TSQueue.hpp"
 
 class Connection : public std::enable_shared_from_this<Connection> {
 public:

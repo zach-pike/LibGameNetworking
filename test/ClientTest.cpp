@@ -1,6 +1,6 @@
-#include "GameClient/GameClient.hpp"
+#include "GameClient.hpp"
 
-#include "util/Collatz.hpp"
+#include "Collatz.hpp"
 
 #include <chrono>
 

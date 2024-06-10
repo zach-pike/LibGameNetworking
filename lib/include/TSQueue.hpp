@@ -4,7 +4,7 @@
 #include <mutex>
 #include <deque>
 
-#include "../Message/Message.hpp"
+#include "Message.hpp"
 
 // Credit https://github.com/OneLoneCoder/Javidx9/blob/master/PixelGameEngine/BiggerProjects/Networking/Parts1%262/net_tsqueue.h
 

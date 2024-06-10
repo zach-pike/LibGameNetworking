@@ -10,9 +10,9 @@
 #include <memory>
 #include <iostream>
 
-#include "../Connection/Connection.hpp"
-#include "../TSQueue/TSQueue.hpp"
-#include "../Message/Message.hpp"
+#include "Connection.hpp"
+#include "TSQueue.hpp"
+#include "Message.hpp"
 
 class GameClient {
 private:

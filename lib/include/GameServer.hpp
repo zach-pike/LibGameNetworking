@@ -11,9 +11,9 @@
 #include <iostream>
 #include <random>
 
-#include "../Connection/Connection.hpp"
-#include "../Message/Message.hpp"
-#include "../TSQueue/TSQueue.hpp"
+#include "Connection.hpp"
+#include "Message.hpp"
+#include "TSQueue.hpp"
 
 class GameServer {
 private:

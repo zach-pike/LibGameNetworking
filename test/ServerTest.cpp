@@ -3,8 +3,8 @@
 #include <iostream>
 #include <map>
 
-#include "GameServer/GameServer.hpp"
-#include "util/Collatz.hpp"
+#include "GameServer.hpp"
+#include "Collatz.hpp"
 
 class MyTestServer : public GameServer {
 private:
@@ -19,7 +19,7 @@ protected:
     bool onClientConnect(std::shared_ptr<Connection> client) override {
         srand(time(nullptr));
 
-        std::uint32_t num = rand() % UINT32_MAX;
+        std::uint32_t num = rand() % 100000;
         std::uint32_t collatz = collatzNumber(num);
 
         client->sendMessage(Message(UINT32_MAX, (std::uint8_t*)&num, 4));
