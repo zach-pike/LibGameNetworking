@@ -26,7 +26,7 @@ private:
     TSQueue<OwnedMessage> incomingMessages;
 
     std::vector<std::shared_ptr<Connection>> connections;
-
+    std::mutex connectionsMutex;
 
 
     void acceptConnection();
@@ -38,7 +38,7 @@ public:
     void startServer();
     void stopServer();
 
-    std::vector<std::shared_ptr<Connection>> getConnectionList();
+    std::vector<std::shared_ptr<Connection>>& getConnectionList();
 
     void messageClient(std::shared_ptr<Connection> client, const Message& msg);
 			

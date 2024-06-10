@@ -51,7 +51,7 @@ void GameServer::stopServer() {
         contextThread.join();
 }
 
-std::vector<std::shared_ptr<Connection>> GameServer::getConnectionList() {
+std::vector<std::shared_ptr<Connection>>& GameServer::getConnectionList() {
 	return connections;
 }
 
@@ -67,6 +67,8 @@ void GameServer::messageClient(std::shared_ptr<Connection> client, const Message
 
 		// Off you go now, bye bye!
 		client.reset();
+
+		std::scoped_lock lock(connectionsMutex);
 
 		// Then physically remove it from the container
 		connections.erase(
@@ -97,9 +99,13 @@ void GameServer::messageAllClients(const Message& msg, std::shared_ptr<Connectio
 
 	// Remove dead clients, all in one go - this way, we dont invalidate the
 	// container as we iterated through it.
-	if (bInvalidClientExists)
+	if (bInvalidClientExists) {
+		std::scoped_lock lock(connectionsMutex);
+
 		connections.erase(
 			std::remove(connections.begin(), connections.end(), nullptr), connections.end());
+
+	}
 }
 
 void GameServer::update() {
