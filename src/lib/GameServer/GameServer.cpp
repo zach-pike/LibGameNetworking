@@ -116,6 +116,9 @@ void GameServer::update() {
 	// Loop over the connections and erase the non open ones
 	for(int i=0; i<connections.size(); i++) {
 		if (!connections[i]->isConnected()) {
+
+			onClientDisconnect(connections[i]);
+
 			connections.erase(connections.begin() + i);
 
 			break;
