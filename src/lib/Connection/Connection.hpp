@@ -18,7 +18,6 @@ private:
     asio::ip::tcp::socket  socket;
     asio::io_context&      context;
 
-
     TSQueue<Message> outgoingQueue;
     TSQueue<OwnedMessage>& incomingQueue;
 
@@ -40,7 +39,10 @@ public:
     ~Connection();
 
     void connectToClient();
-    void connectToServer();
+    void connectToServer(const asio::ip::tcp::resolver::results_type& endpoints);
 
     void sendMessage(Message message);
+
+    bool isConnected();
+    void disconnect();
 };

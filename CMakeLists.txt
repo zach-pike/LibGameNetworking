@@ -10,9 +10,6 @@ file(GLOB_RECURSE LIBFILES src/lib/*.cpp)
 
 add_library(gamenetworking SHARED ${LIBFILES})
 
-add_executable(main src/main.cpp)
-target_link_libraries(main gamenetworking)
-
 add_executable(client src/test/ClientTest.cpp)
 add_executable(server src/test/ServerTest.cpp)
 

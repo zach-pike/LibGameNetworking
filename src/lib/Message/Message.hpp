@@ -16,6 +16,10 @@ public:
 
     Header header;
     std::vector<std::uint8_t> body;
+
+    Message();
+
+    Message(std::uint32_t id, std::string str);
 };
 
 class OwnedMessage {
