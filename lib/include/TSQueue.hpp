@@ -67,6 +67,15 @@ public:
 		std::scoped_lock lock(muxQueue);
 		return deqQueue.empty();
 	}
+
+	TSQueue copy() {
+		TSQueue<T> newQueue;
+
+		std::scoped_lock lock(muxQueue);
+		newQueue.deqQueue = deqQueue;
+
+		return newQueue;
+	}
 	
     size_t count() {
 		std::scoped_lock lock(muxQueue);
