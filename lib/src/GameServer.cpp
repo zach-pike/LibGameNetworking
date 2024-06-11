@@ -51,7 +51,7 @@ void GameServer::stopServer() {
         contextThread.join();
 }
 
-std::vector<std::shared_ptr<Connection>>& GameServer::getConnectionList() {
+TSQueue<std::shared_ptr<Connection>>& GameServer::getConnectionList() {
 	return connections;
 }
 
@@ -68,16 +68,15 @@ void GameServer::messageClient(std::shared_ptr<Connection> client, const Message
 		// Off you go now, bye bye!
 		client.reset();
 
-		std::scoped_lock lock(connectionsMutex);
-
 		// Then physically remove it from the container
-		connections.erase(
-			std::remove(connections.begin(), connections.end(), client), connections.end());
+		connections.eraseItem(client);
 	}
 }
 
 void GameServer::messageAllClients(const Message& msg, std::shared_ptr<Connection> pIgnoreClient) {
 	bool bInvalidClientExists = false;
+	
+	connections.lock();
 
 	// Iterate through all clients in container
 	for (auto& client : connections) {
@@ -97,14 +96,12 @@ void GameServer::messageAllClients(const Message& msg, std::shared_ptr<Connectio
 		}
 	}
 
+	connections.unlock();
+
 	// Remove dead clients, all in one go - this way, we dont invalidate the
 	// container as we iterated through it.
 	if (bInvalidClientExists) {
-		std::scoped_lock lock(connectionsMutex);
-
-		connections.erase(
-			std::remove(connections.begin(), connections.end(), nullptr), connections.end());
-
+		connections.eraseItem(nullptr);
 	}
 }
 
@@ -117,17 +114,5 @@ void GameServer::update() {
 
 		// Pass to message handler
 		onMessage(msg.connection, msg.message);
-	}
-
-	// Loop over the connections and erase the non open ones
-	for(int i=0; i<connections.size(); i++) {
-		if (!connections[i]->isConnected()) {
-
-			onClientDisconnect(connections[i]);
-
-			connections.erase(connections.begin() + i);
-
-			break;
-		}
 	}
 }

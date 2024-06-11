@@ -84,4 +84,35 @@ public:
 			cvBlocking.wait(ul);
 		}
 	}
+
+	T get(std::size_t i) {
+		std::scoped_lock lock(muxQueue);
+		return deqQueue.at(i);
+	} 
+
+	void eraseItem(const T& item) {
+		std::scoped_lock(muxQueue);
+		deqQueue.erase(std::remove(deqQueue.begin(), deqQueue.end(), item), deqQueue.end());
+	}
+
+	void eraseNthItem(std::size_t idx) {
+		std::scoped_lock lock(muxQueue);
+		deqQueue.erase(deqQueue.begin() + idx);
+	}
+
+	void lock() {
+		muxQueue.lock();
+	}
+
+	void unlock() {
+		muxQueue.unlock();
+	}
+
+	typename std::deque<T>::iterator begin() {
+		return deqQueue.begin();
+	}
+
+	typename std::deque<T>::iterator end() {
+		return deqQueue.end();
+	}
 };

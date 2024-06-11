@@ -91,7 +91,7 @@ int main() {
 
     std::thread pt([&]() {
         while(true) {
-            std::cout << "Client Count: " << server.getConnectionList().size() << '\n';
+            std::cout << "Client Count: " << server.getConnectionList().count() << '\n';
             std::this_thread::sleep_for(1s);
         }
     });
